@@ -601,6 +601,15 @@ fail:
 	return rv;
 }
 
+static int xdma_cdev_uevent(struct device *dev, struct kobj_uevent_env *env)
+{
+	/* access mode crw-rw---- */
+	add_uevent_var(env, "DEVMODE=%#o", 0660);
+	/* floppy gid */
+	add_uevent_var(env, "DEVGID=%u", 25);
+	return 0;
+}
+
 int xdma_cdev_init(void)
 {
 	g_xdma_class = class_create(THIS_MODULE, XDMA_NODE_NAME);
@@ -608,6 +617,8 @@ int xdma_cdev_init(void)
 		dbg_init(XDMA_NODE_NAME ": failed to create class");
 		return -EINVAL;
 	}
+
+        g_xdma_class->dev_uevent = xdma_cdev_uevent;
 
 	/* using kmem_cache_create to enable sequential cleanup */
 	cdev_cache = kmem_cache_create("cdev_cache",
